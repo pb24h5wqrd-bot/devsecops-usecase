@@ -69,12 +69,12 @@ jobs:
     - name: Install Cosign
       uses: sigstore/cosign-installer@main
 
-    - name: Generate Cosign keypair (demo only)
-      run: cosign generate-key-pair
+    - name: Generate Cosign keypair (demo only, empty passphrase)
+      run: echo "" | cosign generate-key-pair
 
     - name: Sign the container image with Cosign
       env:
-        COSIGN_PASSWORD: ""  # No passphrase for demo
+        COSIGN_PASSWORD: ""  # Matches empty passphrase
       run: cosign sign -key cosign.key ghcr.io/${{ github.repository }}:latest
 
     - name: Set up Kind cluster
