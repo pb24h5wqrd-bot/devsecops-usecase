@@ -82,7 +82,7 @@ jobs:
 
     - name: Sign the container image with Cosign (keyless, digest)
       env:
-        COSIGN_EXPERIMENTAL: "true"  # Enables keyless mode reliably
+        COSIGN_EXPERIMENTAL: "1"  # Correct string for keyless OIDC mode
       run: |
         cosign sign --yes \
           --registry ghcr.io \
