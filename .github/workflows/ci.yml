@@ -30,7 +30,7 @@ jobs:
         run: docker run --rm $IMAGE sh -c "npm ls cross-spawn"
 
       - name: Trivy scan
-        uses: aquasecurity/trivy-action@v0.11.0
+        uses: aquasecurity/trivy-action@master
         with:
           image-ref: ${{ env.IMAGE }}
           format: table
