@@ -40,7 +40,9 @@ jobs:
 
     - name: Scan image with Trivy
       id: trivy
-      uses: aquasecurity/trivy-action@master
+      uses: aquasecurity/trivy-action@0.28.0
+      env:
+        TRIVY_SKIP_VERSION_CHECK: true # Suppress version check
       with:
         image-ref: ghcr.io/${{ github.repository }}:latest
         format: sarif
