@@ -55,7 +55,7 @@ jobs:
           --output trivy-results.sarif \
           --skip-version-check \
           ghcr.io/${{ github.repository }}:latest
-      continue-on-error: false  # Stops pipeline on failure
+      continue-on-error: false  # Stops pipeline on failure (bonus: gates on vulns)
 
     - name: Upload Trivy scan results to GitHub Security tab
       uses: github/codeql-action/upload-sarif@v3
@@ -78,11 +78,11 @@ jobs:
     - name: Install Cosign
       uses: sigstore/cosign-installer@main
 
-    - name: Generate Cosign keypair (demo only, OpenSSL)
+    - name: Generate Cosign keypair (demo only, ECDSA P-256)
       run: |
-        openssl genrsa -out cosign.key 2048
-        openssl rsa -in cosign.key -pubout -out cosign.pub
-        ls -la cosign.*  # Verify files created
+        openssl ecparam -genkey -name prime256v1 -noout -out cosign.key
+        openssl ec -in cosign.key -pubout -out cosign.pub
+        ls -la cosign.*  # Verify files created (ECDSA format)
 
     - name: Sign the container image with Cosign
       run: cosign sign -key cosign.key ghcr.io/${{ github.repository }}:latest
