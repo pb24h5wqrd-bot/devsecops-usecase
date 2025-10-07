@@ -29,7 +29,13 @@ jobs:
 
       - name: Build Docker image
         run: docker build --no-cache -t $IMAGE .
-     
+      
+      - name: Get image digest
+        id: digest
+        run: |
+          DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' $IMAGE)
+          echo "digest=$DIGEST" >> $GITHUB_OUTPUT
+          
       - name: Debug installed cross-spawn version
         run: docker run --rm $IMAGE sh -c "npm ls cross-spawn"
 
@@ -56,13 +62,16 @@ jobs:
           curl -Lo cosign https://github.com/sigstore/cosign/releases/download/${COSIGN_VERSION}/cosign-linux-amd64
           chmod +x cosign
           sudo mv cosign /usr/local/bin/cosign
+
+      - name: Log in to GitHub Container Registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
           
       - name: Sign image with Cosign
         env:
           COSIGN_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
         run: |
           echo "$COSIGN_KEY" > cosign.key
-          cosign sign --key cosign.key $IMAGE
+          cosign sign --key cosign.key ${{ steps.digest.outputs.digest }}
 
       - name: Push image to GHCR
         run: |
