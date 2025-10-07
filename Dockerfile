@@ -5,7 +5,7 @@ FROM node:18-alpine
 WORKDIR /app
 
 # Copy package files
-COPY app/package*.json ./
+COPY app/package.json app/package-lock.json ./
 
 # Install build tools temporarily and install dependencies
 RUN apk add --no-cache python3 make g++ \
