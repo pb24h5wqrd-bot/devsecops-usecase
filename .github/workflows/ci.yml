@@ -39,9 +39,9 @@ jobs:
         cache-to: type=gha,mode=max
 
     - name: Install Trivy
-      uses: aquasecurity/setup-trivy@v0.2.3  # Corrected to latest stable tag
+      uses: aquasecurity/setup-trivy@v0.2.4  # Updated to latest stable tag
       with:
-        version: 0.61.0  # Pins to recent Trivy version for stability
+        version: 0.67.0  # Latest Trivy release for no version nags
 
     - name: Scan image with Trivy
       id: trivy
