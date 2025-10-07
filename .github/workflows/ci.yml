@@ -1,0 +1,54 @@
+name: Secure CI/CD
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-scan-sign-deploy:
+    runs-on: ubuntu-latest
+    env:
+      IMAGE: ghcr.io/${{ github.repository }}/secure-app:${{ github.run_number }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        run: docker build -t $IMAGE .
+
+      - name: Trivy scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.IMAGE }}
+          format: table
+          exit-code: '1'
+          severity: HIGH,CRITICAL
+
+      - name: Install Syft
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
+          syft $IMAGE -o json > sbom.json
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v3
+
+      - name: Sign image
+        run: cosign sign --key cosign.key $IMAGE
+        env:
+          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+
+      - name: Push image to GHCR
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          docker push $IMAGE
+
+      - name: Deploy to Kubernetes (simulate)
+        if: success()
+        run: |
+          echo "kubectl apply -f k8s/deployment.yaml"
+          echo "kubectl apply -f k8s/service.yaml"
+          echo "Deployment simulated (no cluster required)"
