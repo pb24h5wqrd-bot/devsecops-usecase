@@ -57,8 +57,12 @@ jobs:
           chmod +x cosign
           sudo mv cosign /usr/local/bin/cosign
           
-      - name: Sign image
-        run: cosign sign --keyless $IMAGE
+      - name: Sign image with Cosign
+        env:
+          COSIGN_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
+        run: |
+          echo "$COSIGN_KEY" > cosign.key
+          cosign sign --key cosign.key $IMAGE
 
       - name: Push image to GHCR
         run: |
