@@ -27,6 +27,8 @@ jobs:
           format: table
           exit-code: '1'
           severity: HIGH,CRITICAL
+        env:
+          TRIVY_CACHE_DIR: /tmp/trivy-cache
 
       - name: Install Syft
         run: |
