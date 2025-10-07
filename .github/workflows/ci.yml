@@ -80,7 +80,11 @@ jobs:
       uses: sigstore/cosign-installer@main
 
     - name: Sign the container image with Cosign (keyless)
-      run: cosign sign --yes ghcr.io/${{ github.repository }}:latest
+      run: |
+        cosign sign --yes \
+          --registry ghcr.io \
+          ghcr.io/${{ github.repository }}:latest
+      continue-on-error: false
 
     - name: Set up Kind cluster
       uses: helm/kind-action@v1.8.0
