@@ -47,7 +47,7 @@ jobs:
         image-ref: ghcr.io/${{ github.repository }}:latest
         format: sarif
         output: trivy-results.sarif
-        severity: 'CRITICAL,HIGH'
+        severity: CRITICAL
         exit-code: '1'  # Fail job if critical/high vulns found (bonus: prevents deploy)
       continue-on-error: false  # Ensure failure stops pipeline
 
