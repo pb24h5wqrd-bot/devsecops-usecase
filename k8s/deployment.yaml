@@ -1,27 +1,30 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: secure-app
-  namespace: demo
+  name: app
+  namespace: default
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: secure-app
+      app: app
   template:
     metadata:
       labels:
-        app: secure-app
+        app: app
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001  # Matches Dockerfile user
       containers:
-        - name: secure-app
-          image: ghcr.io/yourusername/secure-app:latest
-          ports:
-            - containerPort: 3000
-          securityContext:
-            runAsNonRoot: true
-            runAsUser: 1001
-          resources:
-            limits:
-              memory: "256Mi"
-              cpu: "500m"
+      - name: app
+        image: ghcr.io/pb24h5wqrd-bot/devsecops-usecase:latest
+        ports:
+        - containerPort: 3000
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "100m"
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
