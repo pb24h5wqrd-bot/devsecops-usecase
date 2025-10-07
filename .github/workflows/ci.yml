@@ -49,9 +49,7 @@ jobs:
         uses: sigstore/cosign-installer@v3
 
       - name: Sign image
-        run: cosign sign --key cosign.key $IMAGE
-        env:
-          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+        run: cosign sign --keyless $IMAGE
 
       - name: Push image to GHCR
         run: |
