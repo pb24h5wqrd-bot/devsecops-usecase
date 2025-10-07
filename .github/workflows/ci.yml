@@ -36,7 +36,6 @@ jobs:
           format: table
           exit-code: '1'
           severity: HIGH,CRITICAL
-          scan-type: fs
           dir: /app/node_modules
         env:
           TRIVY_CACHE_DIR: /tmp/trivy-cache
