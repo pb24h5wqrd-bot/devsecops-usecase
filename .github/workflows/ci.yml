@@ -27,7 +27,7 @@ jobs:
         run: docker build --no-cache -t $IMAGE .
      
       - name: Debug installed cross-spawn version
-        run: docker run --rm my-image:latest sh -c "npm ls cross-spawn"
+        run: docker run --rm $IMAGE sh -c "npm ls cross-spawn"
 
       - name: Trivy scan
         uses: aquasecurity/trivy-action@master
