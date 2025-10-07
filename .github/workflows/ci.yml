@@ -1,5 +1,9 @@
 name: Secure CI/CD
 
+permissions:
+  contents: read
+  id-token: write
+  
 on:
   push:
     branches: [ main ]
