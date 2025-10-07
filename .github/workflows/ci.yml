@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      id-token: write
+      id-token: write  # Enables OIDC for keyless signing
       packages: write  # For GHCR push
 
     steps:
@@ -79,18 +79,14 @@ jobs:
     - name: Install Cosign
       uses: sigstore/cosign-installer@main
 
-    - name: Generate Cosign keypair (demo only, empty passphrase)
-      env:
-        COSIGN_PASSWORD: ""  # Forces non-interactive empty passphrase
-      run: cosign generate-key-pair
-
-    - name: Sign the container image with Cosign
-      env:
-        COSIGN_PASSWORD: ""  # Matches empty passphrase
-      run: cosign sign -key cosign.key ghcr.io/${{ github.repository }}:latest
+    - name: Sign the container image with Cosign (keyless)
+      run: cosign sign --yes ghcr.io/${{ github.repository }}:latest
 
     - name: Set up Kind cluster
       uses: helm/kind-action@v1.8.0
+
+    - name: Load image into Kind (for local cluster pull)
+      run: kind load docker-image ghcr.io/${{ github.repository }}:latest --name kind
 
     - name: Deploy to Kubernetes (Kind)
       run: |
