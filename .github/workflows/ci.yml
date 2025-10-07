@@ -78,13 +78,13 @@ jobs:
     - name: Install Cosign
       uses: sigstore/cosign-installer@main
 
-    - name: Generate Cosign keypair (demo only, non-interactive)
+    - name: Generate Cosign keypair (demo only, OpenSSL)
       run: |
-        echo -e "pass\npass" | cosign generate-key-pair
+        openssl genrsa -out cosign.key 2048
+        openssl rsa -in cosign.key -pubout -out cosign.pub
+        ls -la cosign.*  # Verify files created
 
     - name: Sign the container image with Cosign
-      env:
-        COSIGN_PASSWORD: "pass"  # Matches the piped password
       run: cosign sign -key cosign.key ghcr.io/${{ github.repository }}:latest
       continue-on-error: false
 
