@@ -80,7 +80,9 @@ jobs:
       uses: sigstore/cosign-installer@main
 
     - name: Generate Cosign keypair (demo only, empty passphrase)
-      run: echo "" | cosign generate-key-pair
+      env:
+        COSIGN_PASSWORD: ""  # Forces non-interactive empty passphrase
+      run: cosign generate-key-pair
 
     - name: Sign the container image with Cosign
       env:
