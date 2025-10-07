@@ -29,6 +29,7 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Build and push Docker image
+      id: build-push  # ID for digest output
       uses: docker/build-push-action@v5
       with:
         context: .
@@ -79,18 +80,20 @@ jobs:
     - name: Install Cosign
       uses: sigstore/cosign-installer@main
 
-    - name: Sign the container image with Cosign (keyless)
+    - name: Sign the container image with Cosign (keyless, digest)
+      env:
+        COSIGN_EXPERIMENTAL: "true"  # Enables keyless mode reliably
       run: |
         cosign sign --yes \
           --registry ghcr.io \
-          ghcr.io/${{ github.repository }}:latest
+          ghcr.io/${{ github.repository }}@${{ steps.build-push.outputs.digest }}
       continue-on-error: false
 
     - name: Set up Kind cluster
       uses: helm/kind-action@v1.8.0
 
     - name: Load image into Kind (for local cluster pull)
-      run: kind load docker-image ghcr.io/${{ github.repository }}:latest --name kind
+      run: kind load docker-image ghcr.io/${{ github.repository }}@${{ steps.build-push.outputs.digest }} --name kind
 
     - name: Deploy to Kubernetes (Kind)
       run: |
