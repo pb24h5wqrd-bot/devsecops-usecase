@@ -24,7 +24,10 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Build Docker image
-        run: docker build -t $IMAGE .
+        run: docker build --no-cache -t $IMAGE .
+     
+      - name: Debug installed cross-spawn version
+        run: docker run --rm my-image:latest sh -c "npm ls cross-spawn"
 
       - name: Trivy scan
         uses: aquasecurity/trivy-action@master
