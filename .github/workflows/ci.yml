@@ -41,16 +41,15 @@ jobs:
     - name: Scan image with Trivy
       id: trivy
       uses: aquasecurity/trivy-action@0.28.0
-      env:
-        TRIVY_SKIP_VERSION_CHECK: true # Suppress version check
       with:
         image-ref: ghcr.io/${{ github.repository }}:latest
         format: sarif
         output: trivy-results.sarif
-        severity: CRITICAL
-        exit-code: '1'  # Fail job if critical/high vulns found (bonus: prevents deploy)
-      continue-on-error: false  # Ensure failure stops pipeline
-
+        severity: 'CRITICAL,HIGH'
+        exit-code: '1'  # Fail on critical/high (gates deploy)
+        skip-setup-trivy: true  # Skips version check and setup nag
+      continue-on-error: false
+      
     - name: Upload Trivy scan results
       uses: github/codeql-action/upload-sarif@v3
       with:
