@@ -29,12 +29,6 @@ jobs:
 
       - name: Build Docker image
         run: docker build --no-cache -t $IMAGE .
-      
-      - name: Get image digest
-        id: digest
-        run: |
-          DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' $IMAGE)
-          echo "digest=$DIGEST" >> $GITHUB_OUTPUT
           
       - name: Debug installed cross-spawn version
         run: docker run --rm $IMAGE sh -c "npm ls cross-spawn"
