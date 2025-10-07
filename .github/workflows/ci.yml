@@ -78,15 +78,14 @@ jobs:
     - name: Install Cosign
       uses: sigstore/cosign-installer@main
 
-    - name: Generate Cosign keypair (demo only, ECDSA P-256 with PKCS8)
+    - name: Generate Cosign keypair (demo only, raw PEM ECDSA P-256)
       run: |
-        openssl ecparam -genkey -name prime256v1 -noout -out cosign.key
+        openssl ecparam -genkey -name prime256v1 -out cosign.key
         openssl ec -in cosign.key -pubout -out cosign.pub
-        openssl pkcs8 -topk8 -inform PEM -outform PEM -nocrypt -in cosign.key -out cosign.pkcs8.key
-        ls -la cosign.*  # Verify files (PKCS8 private for signing)
+        ls -la cosign.*  # Verify files created (PEM format for Cosign)
 
     - name: Sign the container image with Cosign
-      run: cosign sign -key cosign.pkcs8.key ghcr.io/${{ github.repository }}:latest
+      run: cosign sign -key cosign.key ghcr.io/${{ github.repository }}:latest
       continue-on-error: false
 
     - name: Set up Kind cluster
