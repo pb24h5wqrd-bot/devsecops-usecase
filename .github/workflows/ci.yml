@@ -56,19 +56,25 @@ jobs:
           --output trivy-results.sarif \
           --skip-version-check \
           ghcr.io/${{ github.repository }}:latest
-      continue-on-error: false  # Stops pipeline on failure (or change to true to ignore)
+      continue-on-error: false  # Stops pipeline on failure
 
     - name: Upload Trivy scan results to GitHub Security tab
       uses: github/codeql-action/upload-sarif@v3
       with:
         sarif_file: trivy-results.sarif
 
+    - name: Install Syft manually
+      run: |
+        wget https://github.com/anchore/syft/releases/download/v1.12.0/syft_1.12.0_linux_amd64.tar.gz
+        tar -xzf syft_1.12.0_linux_amd64.tar.gz
+        sudo mv syft /usr/local/bin/
+        syft version  # Verify install
+
     - name: Generate SBOM with Syft
-      uses: anchore/sbom-action@v0.15.2
-      with:
-        image: ghcr.io/${{ github.repository }}:latest
-        format: spdx-json
-        output-file: sbom.json
+      run: |
+        syft packages docker-image://ghcr.io/${{ github.repository }}:latest \
+          -o spdx-json=sbom.json
+      continue-on-error: false
 
     - name: Install Cosign
       uses: sigstore/cosign-installer@main
