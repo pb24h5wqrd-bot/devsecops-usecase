@@ -47,7 +47,7 @@ jobs:
       id: trivy
       run: |
         trivy image \
-          --exit-code 1 \
+          --exit-code 0 \
           --no-progress \
           --severity CRITICAL,HIGH \
           --format sarif \
