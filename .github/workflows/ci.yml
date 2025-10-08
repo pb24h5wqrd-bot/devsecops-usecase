@@ -29,6 +29,7 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Build and push Docker image
+      id: build-push  # ID for digest
       uses: docker/build-push-action@v5
       with:
         context: .
@@ -69,23 +70,23 @@ jobs:
     - name: Install Cosign
       uses: sigstore/cosign-installer@main
 
-    - name: Generate Cosign keypair (demo only, unencrypted PEM ECDSA)
+    - name: Generate Cosign keypair (demo only, ECDSA PEM format)
       run: |
-        openssl genpkey -algorithm EC -pkeyopt ec_paramgen_curve:prime256v1 -pkeyopt ec_param_enc:named_curve -out cosign.key
-        openssl pkey -in cosign.key -pubout -out cosign.pub
+        openssl ecparam -genkey -name prime256v1 -out cosign.key
+        openssl ec -in cosign.key -pubout -out cosign.pub
         echo "Private key header:"
-        head -n 1 cosign.key  # Should be '-----BEGIN PRIVATE KEY-----'
+        head -n 1 cosign.key  # Should be '-----BEGIN EC PRIVATE KEY-----'
         ls -la cosign.*  # Verify files
 
     - name: Sign the container image with Cosign
-      run: cosign sign -key cosign.key ghcr.io/${{ github.repository }}:latest
+      run: cosign sign -key cosign.key ghcr.io/${{ github.repository }}@${{ steps.build-push.outputs.digest }}
       continue-on-error: false
 
     - name: Set up Kind cluster
       uses: helm/kind-action@v1.8.0
 
     - name: Load image into Kind (for local cluster pull)
-      run: kind load docker-image ghcr.io/${{ github.repository }}:latest --name kind
+      run: kind load docker-image ghcr.io/${{ github.repository }}@${{ steps.build-push.outputs.digest }} --name kind
 
     - name: Deploy to Kubernetes (Kind)
       run: |
