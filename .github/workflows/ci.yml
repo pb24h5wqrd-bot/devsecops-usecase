@@ -12,6 +12,7 @@ jobs:
     permissions:
       contents: read
       packages: write  # For GHCR push
+      security-events: write  # For SARIF upload to Code Scanning
 
     steps:
     - name: Checkout code
