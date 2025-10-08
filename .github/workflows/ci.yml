@@ -48,4 +48,46 @@ jobs:
 
     - name: Scan image with Trivy
       id: trivy
-      run: trivy image --exit-code 0 --no-progress --severity CRITICAL,HIGH --format sarif --output trivy-results.sarif --skip-version-check ghcr.io/${{ github.repository }}:latest  # Set
+      run: trivy image --exit-code 0 --no-progress --severity CRITICAL,HIGH --format sarif --output trivy-results.sarif --skip-version-check ghcr.io/${{ github.repository }}:latest  # Set to --exit-code 1 for prod gating on vulns (bonus)
+      continue-on-error: true  # Allow POC to continue even with errors/vulns
+
+    - name: Upload Trivy scan results to GitHub Security tab
+      uses: github/codeql-action/upload-sarif@v3
+      if: always()  # Upload SARIF even if scan fails
+      with:
+        sarif_file: trivy-results.sarif
+
+    - name: Install Syft manually
+      run: |
+        wget https://github.com/anchore/syft/releases/download/v1.33.0/syft_1.33.0_linux_amd64.tar.gz
+        tar -xzf syft_1.33.0_linux_amd64.tar.gz
+        sudo mv syft /usr/local/bin/
+        syft version  # Verify install
+
+    - name: Generate SBOM with Syft
+      run: syft scan --quiet -o spdx-json=sbom.json registry:ghcr.io/${{ github.repository }}:latest  # Pulls from registry (logged in)
+
+    - name: Install Cosign
+      uses: sigstore/cosign-installer@main
+
+    - name: Generate Cosign keypair (demo only, non-interactive empty passphrase)
+      env:
+        COSIGN_PASSWORD: ""  # Empty for unencrypted key
+      run: cosign generate-key-pair
+
+    - name: Sign the container image with Cosign
+      env:
+        COSIGN_PASSWORD: ""  # Matches empty passphrase
+      run: cosign sign --key cosign.key --force ghcr.io/${{ github.repository }}@${{ steps.build-push.outputs.digest }}  # Skip prompt
+
+    - name: Set up Kind cluster
+      uses: helm/kind-action@v1.8.0
+
+    - name: Load image into Kind (for local cluster pull)
+      run: kind load docker-image ghcr.io/${{ github.repository }}@${{ steps.build-push.outputs.digest }} --name kind
+
+    - name: Deploy to Kubernetes (Kind)
+      run: |
+        kubectl apply -f k8s/
+        kubectl rollout status deployment/app --timeout=300s
+      if: success()  # Only if all prior steps passed
