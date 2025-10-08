@@ -94,6 +94,10 @@ kubectl apply -f k8s/
 	•	Use IRSA (OIDC) for workload identity in AWS.
 	•	Add Prometheus + Grafana for observability and SLO tracking.
 	•	Add Velero backups and chaos drills for DR testing.
+	
+---------------------------------------------------------------------------------------------------------------------------------------------------
+### Security Caveats & Next Steps
+While this pipeline integrates core DevSecOps controls (scanning, SBOM, signing, and policy enforcement), real-world security depends on proper key management, policy enforcement, and secret handling. Future improvements would include keyless signing with OIDC, secret scanning in CI, and periodic policy audits.
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------
  TL;DR Summary
