@@ -78,7 +78,7 @@ jobs:
     - name: Sign the container image with Cosign
       env:
         COSIGN_PASSWORD: ""  # Matches empty passphrase
-      run: cosign sign --key cosign.key --force ghcr.io/${{ github.repository }}@${{ steps.build-push.outputs.digest }}  # Skip prompt
+      run: cosign sign --key cosign.key --yes ghcr.io/${{ github.repository }}@${{ steps.build-push.outputs.digest }}  # Skip prompt
 
     - name: Set up Kind cluster
       uses: helm/kind-action@v1.8.0
