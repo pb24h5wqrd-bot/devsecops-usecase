@@ -58,8 +58,8 @@ jobs:
 
     - name: Install Syft manually
       run: |
-        wget https://github.com/anchore/syft/releases/download/v1.12.0/syft_1.12.0_linux_amd64.tar.gz
-        tar -xzf syft_1.12.0_linux_amd64.tar.gz
+        wget https://github.com/anchore/syft/releases/download/v1.33.0/syft_1.33.0_linux_amd64.tar.gz
+        tar -xzf syft_1.33.0_linux_amd64.tar.gz
         sudo mv syft /usr/local/bin/
         syft version  # Verify install
 
