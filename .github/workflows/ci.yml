@@ -46,19 +46,12 @@ jobs:
 
     - name: Scan image with Trivy
       id: trivy
-      run: |
-        trivy image \
-          --exit-code 0 \  # Set to 1 for prod to fail on vulns (bonus gate)
-          --no-progress \
-          --severity CRITICAL,HIGH \
-          --format sarif \
-          --output trivy-results.sarif \
-          --skip-version-check \
-          ghcr.io/${{ github.repository }}:latest
-      continue-on-error: true  # Allow POC to continue even with vulns
+      run: trivy image --exit-code 0 --no-progress --severity CRITICAL,HIGH --format sarif --output trivy-results.sarif --skip-version-check ghcr.io/${{ github.repository }}:latest  # Set to --exit-code 1 for prod gating on vulns (bonus)
+      continue-on-error: true  # Allow POC to continue even with errors/vulns
 
     - name: Upload Trivy scan results to GitHub Security tab
       uses: github/codeql-action/upload-sarif@v3
+      if: always()  # Upload SARIF even if scan fails
       with:
         sarif_file: trivy-results.sarif
 
