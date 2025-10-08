@@ -80,6 +80,9 @@ jobs:
         COSIGN_PASSWORD: ""  # Matches empty passphrase
       run: cosign sign --key cosign.key --yes ghcr.io/${{ github.repository }}@${{ steps.build-push.outputs.digest }}  # Skip prompt
 
+    - name: Pull image for Kind (ensure local availability)
+      run: docker pull ghcr.io/${{ github.repository }}@${{ steps.build-push.outputs.digest }}
+
     - name: Set up Kind cluster
       uses: helm/kind-action@v1.8.0
 
