@@ -86,6 +86,14 @@ jobs:
     - name: Set up Kind cluster
       uses: helm/kind-action@v1.8.0
 
+    - name: Wait for Kind cluster to be ready
+      run: |
+        until kind get nodes; do
+          echo "Waiting for Kind cluster nodes to be ready..."
+          sleep 5
+        done
+        echo "Kind cluster nodes are ready!"
+
     - name: Load image into Kind (for local cluster pull)
       run: kind load docker-image ghcr.io/${{ github.repository }}@${{ steps.build-push.outputs.digest }} --name kind
 
