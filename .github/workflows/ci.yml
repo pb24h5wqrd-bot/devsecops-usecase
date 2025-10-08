@@ -64,10 +64,7 @@ jobs:
         syft version  # Verify install
 
     - name: Generate SBOM with Syft
-      run: |
-        syft packages docker-image://ghcr.io/${{ github.repository }}:latest \
-          -o spdx-json=sbom.json
-      continue-on-error: false
+      run: syft scan --quiet -o spdx-json=sbom.json registry:ghcr.io/${{ github.repository }}:latest  # Pulls from registry (logged in)
 
     - name: Install Cosign
       uses: sigstore/cosign-installer@main
