@@ -83,16 +83,16 @@ jobs:
     - name: Pull image for Kind (ensure local availability)
       run: docker pull ghcr.io/${{ github.repository }}@${{ steps.build-push.outputs.digest }}
 
-    - name: Set up Kind cluster
-      uses: helm/kind-action@v1.8.0
-
-    - name: Wait for Kind cluster to be ready
+    - name: Install Kind
       run: |
-        until kind get nodes; do
-          echo "Waiting for Kind cluster nodes to be ready..."
-          sleep 5
-        done
-        echo "Kind cluster nodes are ready!"
+        curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.23.0/kind-linux-amd64
+        chmod +x ./kind
+        sudo mv ./kind /usr/local/bin/
+
+    - name: Create Kind cluster and wait for readiness
+      run: |
+        kind create cluster --name kind
+        kubectl wait --for=condition=Ready nodes --all --timeout=300s
 
     - name: Load image into Kind (for local cluster pull)
       run: kind load docker-image ghcr.io/${{ github.repository }}@${{ steps.build-push.outputs.digest }} --name kind
