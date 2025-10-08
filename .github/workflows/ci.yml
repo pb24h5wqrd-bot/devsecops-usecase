@@ -72,10 +72,13 @@ jobs:
 
     - name: Generate Cosign keypair (demo only, ECDSA PEM format)
       run: |
-        openssl genpkey -algorithm EC -pkeyopt ec_paramgen_curve:prime256v1 -out cosign.key
+        openssl genpkey -algorithm EC -pkeyopt ec_paramgen_curve:prime256v1 -out temp.key
+        openssl ec -in temp.key -out cosign.key
         openssl pkey -in cosign.key -pubout -out cosign.pub
+        rm temp.key
         echo "Private key header:"
         head -n 1 cosign.key  # Should be '-----BEGIN EC PRIVATE KEY-----'
+        cat cosign.key | grep -q "BEGIN EC PRIVATE KEY" && echo "Key format verified" || echo "Key format incorrect"
         ls -la cosign.*  # Verify files
 
     - name: Sign the container image with Cosign
